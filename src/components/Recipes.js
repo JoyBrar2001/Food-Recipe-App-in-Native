@@ -5,21 +5,26 @@ import MasonryList from '@react-native-seoul/masonry-list'
 import { mealData } from '../constants'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import Loading from './Loading'
+import { useNavigation } from '@react-navigation/native'
 
-const RecipeCard = ({ item, index }) => {
+const RecipeCard = ({ item, index, navigation }) => {
   let isEven = index % 2 == 0
   let isThird = index % 3 == 0
+
+  // console.log(item)
 
   return (
     <Animated.View entering={FadeInDown.delay(index * 100).duration(600).springify().damping(12)}>
       <Pressable
         className='flex justify-center mb-4 space-y-1'
         style={{ width: '100%', paddingLeft: isEven ? 0 : 8, paddingRight: isEven ? 8 : 0 }}
+        onPress={() => navigation.navigate('RecipeDetail', {...item})}
       >
-        <Image
+        <Animated.Image
           source={{ uri: item.strMealThumb }}
           style={{ width: '100%', height: isThird ? hp(25) : hp(35), borderRadius: 35 }}
           className='bg-black/5'
+          // sharedTransitionTag={item.idMeal}
         />
         <Text className='font-semibold ml-2 text-neutral-600'>
           {item.strMeal.length > 20 ? item.strMeal.slice(0, 20) + '...' : item.strMeal}
@@ -30,6 +35,8 @@ const RecipeCard = ({ item, index }) => {
 }
 
 const Recipes = ({ categories, recipes }) => {
+  const navigation = useNavigation()
+
   return (
     <View className='mx-4 space-y-3'>
       <Text style={{ fontSize: hp(3) }} className='font-semibold text-neutral-600'>Recipes</Text>
@@ -42,7 +49,7 @@ const Recipes = ({ categories, recipes }) => {
             keyExtractor={(item) => item.idMeal}
             numColumns={2}
             showsVerticalScrollIndicator={false}
-            renderItem={({ item, i }) => <RecipeCard item={item} index={i} />}
+            renderItem={({ item, i }) => <RecipeCard item={item} index={i} navigation={navigation} />}
             onEndReachedThreshold={0.1}
           />
         }
