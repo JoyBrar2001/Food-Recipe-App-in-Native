@@ -1,13 +1,51 @@
+import React, { useEffect, useState } from 'react'
 import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import React, { useState } from 'react'
+import { Categories, Recipes } from '../components'
 import { StatusBar } from 'expo-status-bar'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import { FontAwesome5 } from '@expo/vector-icons';
-import Categories from '../components/Categories';
+import axios from 'axios';
 
 const HomeScreen = () => {
+  
   const [activeCategory, setActiveCategory] = useState('Beef')
-    
+  const [categories, setCategories] = useState([])
+  const [recipes, setRecipes] = useState([])
+
+  useEffect(()=>{
+    getCategories()
+    getRecipes()
+  },[])
+
+  const handleChangeCategory = (category) => {
+    getRecipes(category)
+    setActiveCategory(category)
+    setRecipes([])
+  }
+
+  const getCategories = async() => {
+    try{
+      const response = await axios.get('https://themealdb.com/api/json/v1/1/categories.php')
+      if(response){
+        // console.log('Got Categories : ' , response.data.categories)
+        setCategories(response.data.categories)
+      }
+    }catch(err){
+      console.log('Error' , err.message)
+    }
+  }
+  const getRecipes = async(category = 'Beef') => {
+    try{
+      const response = await axios.get(`https://themealdb.com/api/json/v1/1/filter.php?c=${category}`)
+      if(response){
+        // console.log('Got Recipes : ' , response.data.meals)
+        setRecipes(response.data.meals)
+      }
+    }catch(err){
+      console.log('Error' , err.message)
+    }
+  }
+
   return (
     <View className='flex-1 bg-white'>
       <StatusBar style='dark' />
@@ -52,7 +90,13 @@ const HomeScreen = () => {
         </View>
 
         <View>
-          <Categories activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+          {categories.length > 0 &&
+            <Categories categories={categories} activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
+          }
+        </View>
+
+        <View>
+          <Recipes recipes={recipes} categories={categories} />
         </View>
       </ScrollView>
     </View>
